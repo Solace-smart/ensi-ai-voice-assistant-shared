@@ -9,8 +9,8 @@ from ..context.enums import (
     CloudVAAgentPipelineState,
     HASSPipelineStage,
 )
-from ..metrics.local_pipeline_metrics import LocalPipelineMetrics
-from ..metrics.cloud_pipeline_metrics import CloudPipelineMetrics
+from ..metrics.local_pipeline_metrics import PipelineMetrics as LocalPipelineMetrics
+from ..metrics.cloud_pipeline_metrics import PipelineMetrics as CloudPipelineMetrics
 
 
 @dataclass
