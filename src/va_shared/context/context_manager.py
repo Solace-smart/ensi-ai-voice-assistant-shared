@@ -1,10 +1,8 @@
 from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, Optional, ClassVar, List
-from enum import Enum
-import json
+from typing import Dict, Any, List
 from pydantic import BaseModel
 
-from ..context.enums import (
+from .enums import (
     LocalVAAgentPipelineState,
     CloudVAAgentPipelineState,
     HASSPipelineStage,
@@ -113,8 +111,10 @@ class VoiceAssistantAgentContext(BaseModel):
     local_va_agent_end_stage: LocalVAAgentPipelineState
     cloud_va_agent_start_stage: CloudVAAgentPipelineState
     cloud_va_agent_end_stage: CloudVAAgentPipelineState
-    local_context: LocalVAAgentContext = field(default_factory=LocalVAAgentContext)
-    cloud_context: CloudVAAgentContext = field(default_factory=CloudVAAgentContext)
+    local_context: LocalVAAgentContext = field(
+        default_factory=LocalVAAgentContext)
+    cloud_context: CloudVAAgentContext = field(
+        default_factory=CloudVAAgentContext)
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""

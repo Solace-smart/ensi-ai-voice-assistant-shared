@@ -1,3 +1,17 @@
-from .context_manager import ContextManager
+from .context_manager import (
+    LocalVAAgentContext,
+    CloudVAAgentContext,
+    VoiceAssistantAgentContext,
+    HASSVoiceAssistantPipelineContext,
+    STTContext,
+    TTSContext,
+)
 
-__all__ = ["ContextManager"]
+__all__ = [
+    "LocalVAAgentContext",
+    "CloudVAAgentContext",
+    "VoiceAssistantAgentContext",
+    "HASSVoiceAssistantPipelineContext",
+    "STTContext",
+    "TTSContext",
+]

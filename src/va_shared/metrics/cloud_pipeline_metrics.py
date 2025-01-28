@@ -8,12 +8,12 @@ from pydantic import BaseModel
 
 
 @dataclass
-class StepMetrics:
+class StepMetrics(BaseModel):
     state: str
     start_time: float
     end_time: float
     result: Dict
-    error: Optional[Exception] = None
+    error: Optional[str] = None
 
     @staticmethod
     def from_json(json_str: str):
@@ -35,17 +35,17 @@ class StepMetrics:
 
 
 class PipelineMetrics(BaseModel):
-    query: str
+    query: Optional[str] = None
     start_time: Optional[float] = None
     steps: Optional[List[StepMetrics]] = None
     end_time: Optional[float] = None
     failed: Optional[bool] = None
-    error: Optional[Exception] = None
+    error: Optional[str] = None
     _path: Optional[str] = None  # Initialize path tracking
 
     @staticmethod
     def from_json(json_str: Dict[str, Any]):
-        metrics = CloudPipelineMetrics(json_str["query"])
+        metrics = PipelineMetrics(json_str["query"])
         metrics.start_time = json_str["start_time"]
         metrics.steps = [StepMetrics.from_json(
             step) for step in json_str["steps"]]
@@ -68,7 +68,7 @@ class PipelineMetrics(BaseModel):
             start_time=start_time,
             end_time=time.time(),
             result=result,
-            error=error,
+            error=str(error),
         )
         self.steps.append(step)
 
@@ -77,7 +77,7 @@ class PipelineMetrics(BaseModel):
 
         if error:
             self.failed = True
-            self.error = error
+            self.error = str(error)
 
     def _update_path(self, state: str, result: Dict):
         """Update path based on the step result"""
@@ -126,7 +126,7 @@ class PipelineMetrics(BaseModel):
             summary.append(
                 f"{i}. {step.state} ({step.duration:.3f}s) - {step.status}")
             if step.error:
-                summary.append(f"   ❌ Error: {str(step.error)}")
+                summary.append(f"   ❌ Error: {step.error}")
                 summary.append(
                     f"   ❌ Traceback: {traceback.format_tb(
                         step.error.__traceback__)[-1]}"
@@ -137,7 +137,7 @@ class PipelineMetrics(BaseModel):
 
         if self.failed:
             summary.append("\n=== Pipeline Failed ===")
-            summary.append(f"Final Error: {str(self.error)}")
+            summary.append(f"Final Error: {self.error}")
             summary.append("Traceback:")
             summary.append(traceback.format_exc())
         else:

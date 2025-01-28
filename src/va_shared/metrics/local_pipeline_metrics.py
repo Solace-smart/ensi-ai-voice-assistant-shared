@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 import traceback
 from .path_mapping import PathNode
+from pydantic import BaseModel
 
 
 @dataclass
@@ -12,7 +13,7 @@ class StepMetrics:
     start_time: float
     end_time: float
     result: Dict
-    error: Optional[Exception] = None
+    error: Optional[str] = None
 
     @staticmethod
     def from_json(json_str: str):
@@ -33,21 +34,21 @@ class StepMetrics:
         return "FAILED" if self.error else "SUCCESS"
 
 
-class PipelineMetrics:
-    def __init__(self, query):
-        self.query = query
-        self.start_time = time.time()
-        self.steps: List[StepMetrics] = []
-        self.end_time: float = None
-        self.failed: bool = False
-        self.error: Optional[Exception] = None
-        self._path = ""  # Initialize path tracking
+class PipelineMetrics(BaseModel):
+    query: Optional[str] = None
+    start_time: Optional[float] = None
+    steps: Optional[List[StepMetrics]] = None
+    end_time: Optional[float] = None
+    failed: Optional[bool] = None
+    error: Optional[str] = None
+    _path: Optional[str] = None  # Initialize path tracking
 
     @staticmethod
     def from_json(json_str: str):
-        metrics = LocalPipelineMetrics(json_str["query"])
+        metrics = PipelineMetrics(json_str["query"])
         metrics.start_time = json_str["start_time"]
-        metrics.steps = [StepMetrics.from_json(step) for step in json_str["steps"]]
+        metrics.steps = [StepMetrics.from_json(
+            step) for step in json_str["steps"]]
         metrics.end_time = json_str["end_time"]
         metrics.failed = json_str["failed"]
         metrics.error = json_str.get("error", None)
@@ -67,7 +68,7 @@ class PipelineMetrics:
             start_time=start_time,
             end_time=time.time(),
             result=result,
-            error=error,
+            error=str(error),
         )
         self.steps.append(step)
 
@@ -76,12 +77,13 @@ class PipelineMetrics:
 
         if error:
             self.failed = True
-            self.error = error
+            self.error = str(error)
 
     def _update_path(self, state: str, result: Dict):
         """Update path based on the step result"""
         if state == "automation_classification":
-            value = "automation" if result.get("is_automation") else "not_automation"
+            value = "automation" if result.get(
+                "is_automation") else "not_automation"
             self._path += str(PathNode.AUTOMATION.get(value, "x"))
         elif state == "general_domain_classification":
             value = result.get("general_domain")
@@ -123,9 +125,10 @@ class PipelineMetrics:
         ]
 
         for i, step in enumerate(self.steps, 1):
-            summary.append(f"{i}. {step.state} ({step.duration:.3f}s) - {step.status}")
+            summary.append(
+                f"{i}. {step.state} ({step.duration:.3f}s) - {step.status}")
             if step.error:
-                summary.append(f"   ❌ Error: {str(step.error)}")
+                summary.append(f"   ❌ Error: {step.error}")
                 summary.append(
                     f"   ❌ Traceback: {traceback.format_tb(
                         step.error.__traceback__)[-1]}"
@@ -136,7 +139,7 @@ class PipelineMetrics:
 
         if self.failed:
             summary.append("\n=== Pipeline Failed ===")
-            summary.append(f"Final Error: {str(self.error)}")
+            summary.append(f"Final Error: {self.error}")
             summary.append("Traceback:")
             summary.append(traceback.format_exc())
         else:
