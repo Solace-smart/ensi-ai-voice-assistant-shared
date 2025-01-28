@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class LocalVAAgentPipelineState(Enum):
+class LocalVAAgentPipelineState(StrEnum):
     """States for local voice assistant pipeline"""
 
     INIT = "init"
@@ -12,7 +12,7 @@ class LocalVAAgentPipelineState(Enum):
     END = "end"
 
 
-class CloudVAAgentPipelineState(Enum):
+class CloudVAAgentPipelineState(StrEnum):
     """States for cloud voice assistant pipeline"""
 
     INIT = "init"
@@ -47,11 +47,11 @@ class CloudVAAgentPipelineState(Enum):
     END = "end"
 
 
-class HASSPipelineStage(Enum):
+class HASSPipelineStage(StrEnum):
     """Stages for HASS voice assistant pipeline"""
 
-    INIT = "init"
+    WAKE_WORD = "wake_word"
     STT = "stt"
-    VA_AGENT = "va_agent"
+    INTENT = "intent"
     TTS = "tts"
     END = "end"

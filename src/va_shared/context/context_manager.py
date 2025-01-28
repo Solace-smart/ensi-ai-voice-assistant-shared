@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 
 from .enums import (
@@ -15,9 +15,9 @@ from ..metrics.cloud_pipeline_metrics import PipelineMetrics as CloudPipelineMet
 class STTContext(BaseModel):
     """Context for Speech-to-Text processing"""
 
-    text_result: str = ""
-    confidence: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    text_result: Optional[str] = None
+    confidence: Optional[float] = None
+    metadata: Optional[Dict[str, Any]] = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
@@ -33,8 +33,8 @@ class STTContext(BaseModel):
 class TTSContext(BaseModel):
     """Context for Text-to-Speech processing"""
 
-    speech_result: bytes = bytes()
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    speech_result: Optional[bytes] = None
+    metadata: Optional[Dict[str, Any]] = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""

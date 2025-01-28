@@ -7,6 +7,12 @@ from .context_manager import (
     TTSContext,
 )
 
+from .enums import (
+    LocalVAAgentPipelineState,
+    CloudVAAgentPipelineState,
+    HASSPipelineStage,
+)
+
 __all__ = [
     "LocalVAAgentContext",
     "CloudVAAgentContext",
@@ -14,4 +20,7 @@ __all__ = [
     "HASSVoiceAssistantPipelineContext",
     "STTContext",
     "TTSContext",
+    "LocalVAAgentPipelineState",
+    "CloudVAAgentPipelineState",
+    "HASSPipelineStage",
 ]
