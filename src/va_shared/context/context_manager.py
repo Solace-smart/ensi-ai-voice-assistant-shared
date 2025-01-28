@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, asdict
 from typing import Dict, Any, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .enums import (
     LocalVAAgentPipelineState,
@@ -11,17 +11,22 @@ from ..metrics.local_pipeline_metrics import PipelineMetrics as LocalPipelineMet
 from ..metrics.cloud_pipeline_metrics import PipelineMetrics as CloudPipelineMetrics
 
 
-@dataclass
 class STTContext(BaseModel):
     """Context for Speech-to-Text processing"""
 
-    text_result: Optional[str] = None
-    confidence: Optional[float] = None
-    metadata: Optional[Dict[str, Any]] = None
+    model_config = ConfigDict(
+        extra='allow',
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
+
+    text_result: str | None = None
+    confidence: float | None = None
+    metadata: dict[str, Any] | None = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
-        return asdict(self)
+        return self.model_dump(exclude_none=True)
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "STTContext":
@@ -29,17 +34,22 @@ class STTContext(BaseModel):
         return cls(**data)
 
 
-@dataclass
 class TTSContext(BaseModel):
     """Context for Text-to-Speech processing"""
 
-    speech_result: Optional[bytes] = None
-    metadata: Optional[Dict[str, Any]] = None
+    model_config = ConfigDict(
+        extra='allow',
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
+
+    speech_result: bytes | None = None
+    metadata: dict[str, Any] | None = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
         return {
-            "speech_result": list(self.speech_result),  # Convert bytes to list
+            "speech_result": list(self.speech_result) if self.speech_result else None,
             "metadata": self.metadata,
         }
 
@@ -51,7 +61,6 @@ class TTSContext(BaseModel):
         )
 
 
-@dataclass
 class LocalVAAgentContext(BaseModel):
     """Context specific to local voice assistant agent"""
 
@@ -72,7 +81,6 @@ class LocalVAAgentContext(BaseModel):
         return cls(**data)
 
 
-@dataclass
 class CloudVAAgentContext(BaseModel):
     """Context specific to cloud voice assistant agent"""
 
@@ -94,9 +102,14 @@ class CloudVAAgentContext(BaseModel):
         return cls(**data)
 
 
-@dataclass
 class VoiceAssistantAgentContext(BaseModel):
     """Main context for voice assistant agent"""
+
+    model_config = ConfigDict(
+        extra='allow',
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
 
     conversation_id: str = ""
     language: str | None = None
@@ -148,9 +161,14 @@ class VoiceAssistantAgentContext(BaseModel):
         )
 
 
-@dataclass
 class HASSVoiceAssistantPipelineContext(BaseModel):
     """Global context for HASS voice assistant pipeline"""
+
+    model_config = ConfigDict(
+        extra='allow',
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
 
     hass_va_pipeline_start_stage: HASSPipelineStage
     hass_va_pipeline_end_stage: HASSPipelineStage
