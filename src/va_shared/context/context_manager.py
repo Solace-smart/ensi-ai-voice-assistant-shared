@@ -1,25 +1,20 @@
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, List, Optional
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
+from homeassistant.util import ulid
+
+from ..metrics.pipeline_metrics import PipelineMetrics as PipelineMetrics
 from .enums import (
-    LocalVAAgentPipelineState,
     CloudVAAgentPipelineState,
     HASSPipelineStage,
+    LocalVAAgentPipelineState,
 )
-from ..metrics.local_pipeline_metrics import PipelineMetrics as LocalPipelineMetrics
-from ..metrics.cloud_pipeline_metrics import PipelineMetrics as CloudPipelineMetrics
 
 
 class STTContext(BaseModel):
     """Context for Speech-to-Text processing"""
-
-    model_config = ConfigDict(
-        extra='allow',
-        arbitrary_types_allowed=True,
-        validate_assignment=True
-    )
-
     text_result: str | None = None
     confidence: float | None = None
     metadata: dict[str, Any] | None = None
@@ -36,13 +31,6 @@ class STTContext(BaseModel):
 
 class TTSContext(BaseModel):
     """Context for Text-to-Speech processing"""
-
-    model_config = ConfigDict(
-        extra='allow',
-        arbitrary_types_allowed=True,
-        validate_assignment=True
-    )
-
     speech_result: bytes | None = None
     metadata: dict[str, Any] | None = None
 
@@ -56,24 +44,22 @@ class TTSContext(BaseModel):
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "TTSContext":
         """Create instance from JSON dict."""
-        return cls(
-            speech_result=bytes(data["speech_result"]), metadata=data["metadata"]
-        )
+        if data.get("speech_result"):
+            data["speech_result"] = bytes(data["speech_result"])
+        return cls(**data)
 
 
 class LocalVAAgentContext(BaseModel):
     """Context specific to local voice assistant agent"""
 
-    conversation_id: str = ""
-    language: str | None = None
     local_processing_results: Dict[str, Any] = field(default_factory=dict)
-    metrics: LocalPipelineMetrics = field(default_factory=LocalPipelineMetrics)
+    metrics: PipelineMetrics = field(default_factory=PipelineMetrics)
     leaf_id: str | None = None
     summary: str | None = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
-        return asdict(self)
+        return self.model_dump(exclude_none=True)
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "LocalVAAgentContext":
@@ -84,17 +70,17 @@ class LocalVAAgentContext(BaseModel):
 class CloudVAAgentContext(BaseModel):
     """Context specific to cloud voice assistant agent"""
 
-    cloud_processing_results: Dict[str, Any] = field(default_factory=dict)
-    metrics: CloudPipelineMetrics = field(default_factory=CloudPipelineMetrics)
-    leaf_id: str | None = None
+    cloud_processing_results: Dict[str, Any] = {}
+    metrics: PipelineMetrics = PipelineMetrics()
+    leaf_id: str | None = ""
     summary: str | None = None
     response: str = ""
-    ha_states: Dict[str, Any] = field(default_factory=dict)
-    ha_services: Dict[str, Any] = field(default_factory=dict)
+    ha_states: Dict[str, Any] = None
+    ha_services: Dict[str, Any] = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
-        return asdict(self)
+        return self.model_dump(exclude_none=True)
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "CloudVAAgentContext":
@@ -104,34 +90,39 @@ class CloudVAAgentContext(BaseModel):
 
 class VoiceAssistantAgentContext(BaseModel):
     """Main context for voice assistant agent"""
-
     model_config = ConfigDict(
         extra='allow',
         arbitrary_types_allowed=True,
         validate_assignment=True
     )
 
-    conversation_id: str = ""
+    conversation_id: str
     language: str | None = None
-    query_id: str = ""
+    query_id: str
     query: str = ""
 
-    in_session_memory: List[Dict[str, Any]] = field(default_factory=list)
-    last_interaction: Dict[str, Any] | None = None
-    persistent_memory: Dict[str, Any] = field(default_factory=dict)
+    in_session_memory: list[dict[str, Any]] = []
+    last_interaction: dict[str, Any] | None = None
+    persistent_memory: dict[str, Any] = {}
 
     local_va_agent_start_stage: LocalVAAgentPipelineState
     local_va_agent_end_stage: LocalVAAgentPipelineState
     cloud_va_agent_start_stage: CloudVAAgentPipelineState
     cloud_va_agent_end_stage: CloudVAAgentPipelineState
-    local_context: LocalVAAgentContext = field(
-        default_factory=LocalVAAgentContext)
-    cloud_context: CloudVAAgentContext = field(
-        default_factory=CloudVAAgentContext)
+
+    local_context: LocalVAAgentContext = LocalVAAgentContext()
+    cloud_context: CloudVAAgentContext = CloudVAAgentContext()
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
         return {
+            "conversation_id": self.conversation_id,
+            "language": self.language,
+            "query_id": self.query_id,
+            "query": self.query,
+            "in_session_memory": self.in_session_memory,
+            "last_interaction": self.last_interaction,
+            "persistent_memory": self.persistent_memory,
             "local_va_agent_start_stage": self.local_va_agent_start_stage.value,
             "local_va_agent_end_stage": self.local_va_agent_end_stage.value,
             "cloud_va_agent_start_stage": self.cloud_va_agent_start_stage.value,
@@ -143,19 +134,24 @@ class VoiceAssistantAgentContext(BaseModel):
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "VoiceAssistantAgentContext":
         """Create instance from JSON dict."""
+        if isinstance(data, VoiceAssistantAgentContext):
+            return data
         return cls(
+            conversation_id=data["conversation_id"],
+            language=data["language"],
+            query_id=data["query_id"],
+            query=data["query"],
+            in_session_memory=data["in_session_memory"],
+            last_interaction=data["last_interaction"],
+            persistent_memory=data["persistent_memory"],
             local_va_agent_start_stage=LocalVAAgentPipelineState(
-                data["local_va_agent_start_stage"]
-            ),
+                data["local_va_agent_start_stage"]),
             local_va_agent_end_stage=LocalVAAgentPipelineState(
-                data["local_va_agent_end_stage"]
-            ),
+                data["local_va_agent_end_stage"]),
             cloud_va_agent_start_stage=CloudVAAgentPipelineState(
-                data["cloud_va_agent_start_stage"]
-            ),
+                data["cloud_va_agent_start_stage"]),
             cloud_va_agent_end_stage=CloudVAAgentPipelineState(
-                data["cloud_va_agent_end_stage"]
-            ),
+                data["cloud_va_agent_end_stage"]),
             local_context=LocalVAAgentContext.from_json(data["local_context"]),
             cloud_context=CloudVAAgentContext.from_json(data["cloud_context"]),
         )
@@ -163,13 +159,6 @@ class VoiceAssistantAgentContext(BaseModel):
 
 class HASSVoiceAssistantPipelineContext(BaseModel):
     """Global context for HASS voice assistant pipeline"""
-
-    model_config = ConfigDict(
-        extra='allow',
-        arbitrary_types_allowed=True,
-        validate_assignment=True
-    )
-
     hass_va_pipeline_start_stage: HASSPipelineStage
     hass_va_pipeline_end_stage: HASSPipelineStage
     stt_context: STTContext = field(default_factory=STTContext)
@@ -200,15 +189,12 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
         """Create instance from JSON dict."""
         return cls(
             hass_va_pipeline_start_stage=HASSPipelineStage(
-                data["hass_va_pipeline_start_stage"]
-            ),
+                data["hass_va_pipeline_start_stage"]),
             hass_va_pipeline_end_stage=HASSPipelineStage(
-                data["hass_va_pipeline_end_stage"]
-            ),
+                data["hass_va_pipeline_end_stage"]),
             stt_context=STTContext.from_json(data["stt_context"]),
             va_agent_context=VoiceAssistantAgentContext.from_json(
-                data["va_agent_context"]
-            ),
+                data["va_agent_context"]),
             tts_context=TTSContext.from_json(data["tts_context"]),
             shared_data=data["shared_data"],
         )
