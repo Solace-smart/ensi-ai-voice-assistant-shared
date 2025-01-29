@@ -1,4 +1,4 @@
-from .local_pipeline_metrics import PipelineMetrics as LocalPipelineMetrics
-from .cloud_pipeline_metrics import PipelineMetrics as CloudPipelineMetrics
+from .pipeline_metrics import PipelineMetrics
 
-__all__ = ["LocalPipelineMetrics", "CloudPipelineMetrics"]
+
+__all__ = ["PipelineMetrics"]
