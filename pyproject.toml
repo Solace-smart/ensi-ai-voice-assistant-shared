@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [project.scripts]
-bump-version = "scripts.bump_version"
+bump-version = "scripts.bump_version:main"
