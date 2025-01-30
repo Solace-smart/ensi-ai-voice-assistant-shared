@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="va-shared",
-    version="0.1.4",
+    version="0.1.6",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[

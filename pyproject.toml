@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "va-shared"
-version = "0.1.4"
+version = "0.1.6"
 description = "Shared utilities for Ensi AI Voice Assistant"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [project.scripts]
-bump-version = "0.1.4"
+bump-version = "0.1.6"

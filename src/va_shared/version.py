@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 from typing import Tuple
 
-VERSION = "0.1.3"
+VERSION = "0.1.6"
 
 def get_version() -> str:
     """Get the current version."""
@@ -45,17 +45,25 @@ def update_version_files(new_version: str) -> None:
     # Update version.py
     version_file = root_dir / "src" / "va_shared" / "version.py"
     content = version_file.read_text()
-    content = re.sub(r'VERSION = "0.1.3"]+"', f'VERSION = "0.1.3"', content)
+    content = re.sub(r'VERSION = "0.1.6"]+"', f'VERSION = "0.1.6"', content)
     version_file.write_text(content)
 
     # Update pyproject.toml
     pyproject_file = root_dir / "pyproject.toml"
     content = pyproject_file.read_text()
-    content = re.sub(r'version = "[^"]+"', f'version = "{new_version}"', content)
+    content = re.sub(
+        r'version = "[^"]+"',
+        f'version = "{new_version}"',
+        content
+    )
     pyproject_file.write_text(content)
 
     # Update setup.py
     setup_file = root_dir / "setup.py"
     content = setup_file.read_text()
-    content = re.sub(r'version="[^"]+"', f'version="{new_version}"', content)
+    content = re.sub(
+        r'version="[^"]+"',
+        f'version="{new_version}"',
+        content
+    )
     setup_file.write_text(content)
