@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncIterable, Awaitable, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -157,10 +157,29 @@ class VoiceAssistantAgentContext(BaseModel):
         )
 
 
+class SatelliteInputContext(BaseModel):
+    """Context for satellite input processing"""
+    input_stream_method: Callable[[], AsyncIterable[bytes]] | None = None
+    metadata: dict[str, Any] | None = None
+
+    def to_json(self) -> Dict[str, Any]:
+        return self.model_dump(exclude_none=True)
+
+
+class SatelliteOutputContext(BaseModel):
+    """Context for satellite output processing"""
+    output_stream_method: Callable[[AsyncIterable[bytes]], Awaitable[None]] | None = None
+    metadata: dict[str, Any] | None = None
+
+    def to_json(self) -> Dict[str, Any]:
+        return self.model_dump(exclude_none=True)
+
+
 class HASSVoiceAssistantPipelineContext(BaseModel):
     """Global context for HASS voice assistant pipeline"""
     hass_va_pipeline_start_stage: HASSPipelineStage
     hass_va_pipeline_end_stage: HASSPipelineStage
+    satellite_input_context: SatelliteInputContext = field(default_factory=SatelliteInputContext)
     stt_context: STTContext = field(default_factory=STTContext)
     va_agent_context: VoiceAssistantAgentContext = field(
         default_factory=lambda: VoiceAssistantAgentContext(
@@ -171,7 +190,9 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
         )
     )
     tts_context: TTSContext = field(default_factory=TTSContext)
+    satellite_output_context: SatelliteOutputContext = field(default_factory=SatelliteOutputContext)
     shared_data: Dict[str, Any] = field(default_factory=dict)
+
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
@@ -182,6 +203,8 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
             "va_agent_context": self.va_agent_context.to_json(),
             "tts_context": self.tts_context.to_json(),
             "shared_data": self.shared_data,
+            "satellite_input_context": self.satellite_input_context.to_json(),
+            "satellite_output_context": self.satellite_output_context.to_json(),
         }
 
     @classmethod
@@ -197,4 +220,6 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
                 data["va_agent_context"]),
             tts_context=TTSContext.from_json(data["tts_context"]),
             shared_data=data["shared_data"],
+            satellite_input_context=SatelliteInputContext.from_json(data["satellite_input_context"]),
+            satellite_output_context=SatelliteOutputContext.from_json(data["satellite_output_context"]),
         )

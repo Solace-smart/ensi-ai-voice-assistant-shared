@@ -1,7 +1,15 @@
 from enum import StrEnum
 
 
-class LocalVAAgentPipelineState(StrEnum):
+class IndexedStrEnum(StrEnum):
+    """StrEnum with index functionality"""
+
+    @property
+    def index(self):
+        """Get the zero-based index of the enum value"""
+        return list(self.__class__).index(self)
+
+class LocalVAAgentPipelineState(IndexedStrEnum):
     """States for local voice assistant pipeline"""
 
     INIT = "init"
@@ -12,7 +20,7 @@ class LocalVAAgentPipelineState(StrEnum):
     END = "end"
 
 
-class CloudVAAgentPipelineState(StrEnum):
+class CloudVAAgentPipelineState(IndexedStrEnum):
     """States for cloud voice assistant pipeline"""
 
     INIT = "init"
@@ -47,11 +55,25 @@ class CloudVAAgentPipelineState(StrEnum):
     END = "end"
 
 
-class HASSPipelineStage(StrEnum):
-    """Stages for HASS voice assistant pipeline"""
-
-    WAKE_WORD = "wake_word"
+class HASSPipelineStage(IndexedStrEnum):
+    """Stages of a pipeline."""
+    INIT = "init"
+    SATELLITE_INPUT = "satellite_input"
     STT = "stt"
-    INTENT = "intent"
+    AGENT = "agent"
     TTS = "tts"
+    SATELLITE_OUTPUT = "satellite_output"
+    ORCHESTRATION = "orchestration"
     END = "end"
+
+
+PIPELINE_STAGE_ORDER = [
+    HASSPipelineStage.INIT,
+    HASSPipelineStage.SATELLITE_INPUT,
+    HASSPipelineStage.STT,
+    HASSPipelineStage.AGENT,
+    HASSPipelineStage.TTS,
+    HASSPipelineStage.SATELLITE_OUTPUT,
+    HASSPipelineStage.ORCHESTRATION,
+    HASSPipelineStage.END,
+]
