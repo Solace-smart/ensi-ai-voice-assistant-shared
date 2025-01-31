@@ -96,19 +96,19 @@ class VoiceAssistantAgentContext(BaseModel):
         validate_assignment=True
     )
 
-    conversation_id: str
+    conversation_id: str | None = None
     language: str | None = None
-    query_id: str
-    query: str = ""
+    query_id: str | None = None
+    query: str | None = None
 
     in_session_memory: list[dict[str, Any]] = []
     last_interaction: dict[str, Any] | None = None
     persistent_memory: dict[str, Any] = {}
 
-    local_va_agent_start_stage: LocalVAAgentPipelineState
-    local_va_agent_end_stage: LocalVAAgentPipelineState
-    cloud_va_agent_start_stage: CloudVAAgentPipelineState
-    cloud_va_agent_end_stage: CloudVAAgentPipelineState
+    local_va_agent_start_stage: LocalVAAgentPipelineState = LocalVAAgentPipelineState.INIT
+    local_va_agent_end_stage: LocalVAAgentPipelineState = LocalVAAgentPipelineState.END
+    cloud_va_agent_start_stage: CloudVAAgentPipelineState = CloudVAAgentPipelineState.INIT
+    cloud_va_agent_end_stage: CloudVAAgentPipelineState = CloudVAAgentPipelineState.END
 
     local_context: LocalVAAgentContext = LocalVAAgentContext()
     cloud_context: CloudVAAgentContext = CloudVAAgentContext()
@@ -168,7 +168,7 @@ class SatelliteInputContext(BaseModel):
 
 class SatelliteOutputContext(BaseModel):
     """Context for satellite output processing"""
-    output_stream_method: Callable[[AsyncIterable[bytes]], Awaitable[None]] | None = None
+    output_stream_method: Callable[[], Awaitable[None]] | None = None
     metadata: dict[str, Any] | None = None
 
     def to_json(self) -> Dict[str, Any]:
@@ -177,12 +177,14 @@ class SatelliteOutputContext(BaseModel):
 
 class HASSVoiceAssistantPipelineContext(BaseModel):
     """Global context for HASS voice assistant pipeline"""
-    hass_va_pipeline_start_stage: HASSPipelineStage
-    hass_va_pipeline_end_stage: HASSPipelineStage
+    hass_va_pipeline_start_stage: HASSPipelineStage = HASSPipelineStage.INIT
+    hass_va_pipeline_end_stage: HASSPipelineStage = HASSPipelineStage.END
     satellite_input_context: SatelliteInputContext = field(default_factory=SatelliteInputContext)
     stt_context: STTContext = field(default_factory=STTContext)
     va_agent_context: VoiceAssistantAgentContext = field(
         default_factory=lambda: VoiceAssistantAgentContext(
+            conversation_id=ulid.ulid(),
+            query_id=ulid.ulid(),
             local_va_agent_start_stage=LocalVAAgentPipelineState.INIT,
             local_va_agent_end_stage=LocalVAAgentPipelineState.END,
             cloud_va_agent_start_stage=CloudVAAgentPipelineState.INIT,
