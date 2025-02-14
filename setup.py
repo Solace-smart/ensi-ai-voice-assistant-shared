@@ -6,7 +6,7 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[
-        "pydantic>=2.0.0",
+        "pydantic>=2.8.2",
         "firebase-admin>=6.0.0",
         "aiohttp>=3.8.0",
     ],
