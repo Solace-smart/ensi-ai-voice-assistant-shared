@@ -91,19 +91,35 @@ class PipelineMetrics(BaseModel):
 
     def _update_path(self, state: str, result: Dict):
         """Update path based on the step result"""
-        if state == "automation_classification":
+        if state == "all_classification":
             value = "automation" if result.get(
                 "is_automation") else "not_automation"
             self._path += str(PathNode.AUTOMATION.get(value, "x"))
-        elif state == "general_domain_classification":
+
             value = result.get("general_domain")
             self._path += str(PathNode.GENERAL_DOMAIN.get(value, "x"))
-        elif state == "tool_selection":
+
             value = result.get("tool")
             self._path += str(PathNode.TOOL.get(value, "x"))
-        elif state == "time_related_selection":
-            value = result.get("time_related_device")
-            self._path += str(PathNode.TIME_DEVICE.get(value, "x"))
+
+            # value = result.get("time_related_device")
+            # self._path += str(PathNode.TIME_DEVICE.get(value, "x"))
+
+            print(f"All classification path: {self._path}")
+
+        # elif state == "automation_classification":
+        #     value = "automation" if result.get(
+        #         "is_automation") else "not_automation"
+        #     self._path += str(PathNode.AUTOMATION.get(value, "x"))
+        # elif state == "general_domain_classification":
+        #     value = result.get("general_domain")
+        #     self._path += str(PathNode.GENERAL_DOMAIN.get(value, "x"))
+        # elif state == "tool_selection":
+        #     value = result.get("tool")
+        #     self._path += str(PathNode.TOOL.get(value, "x"))
+        # elif state == "time_related_selection":
+        #     value = result.get("time_related_device")
+        #     self._path += str(PathNode.TIME_DEVICE.get(value, "x"))
 
     @property
     def leaf_id(self) -> str:
