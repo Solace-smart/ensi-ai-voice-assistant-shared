@@ -60,7 +60,7 @@ class HASSPipelineStage(IndexedStrEnum):
     INIT = "init"
     SATELLITE_INPUT = "satellite_input"
     STT = "stt"
-    INTENT = "intent"
+    AGENT = "agent"
     TTS = "tts"
     SATELLITE_OUTPUT = "satellite_output"
     ORCHESTRATION = "orchestration"
@@ -71,7 +71,7 @@ PIPELINE_STAGE_ORDER = [
     HASSPipelineStage.INIT,
     HASSPipelineStage.SATELLITE_INPUT,
     HASSPipelineStage.STT,
-    HASSPipelineStage.INTENT,
+    HASSPipelineStage.AGENT,
     HASSPipelineStage.TTS,
     HASSPipelineStage.SATELLITE_OUTPUT,
     HASSPipelineStage.ORCHESTRATION,
