@@ -2,13 +2,14 @@ from setuptools import find_packages, setup
 
 setup(
     name="va-shared",
-    version="0.1.19",
+    version="0.1.20",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[
         "pydantic>=1.10.17",
         "firebase-admin>=6.0.0",
         "aiohttp>=3.8.0",
+        "ulid-py>=1.1.0",
     ],
     python_requires=">=3.10",
     author="Solace Smart",

@@ -2,8 +2,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, AsyncIterable, Awaitable, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
-
-from homeassistant.util import ulid
+import ulid
 
 from ..metrics.pipeline_metrics import PipelineMetrics as PipelineMetrics
 from .enums import (
@@ -183,8 +182,8 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
     stt_context: STTContext = Field(default_factory=STTContext)
     va_agent_context: VoiceAssistantAgentContext = Field(
         default_factory=lambda: VoiceAssistantAgentContext(
-            conversation_id=ulid.ulid(),
-            query_id=ulid.ulid(),
+            conversation_id=ulid.new(),
+            query_id=ulid.new(),
             local_va_agent_start_stage=LocalVAAgentPipelineState.INIT,
             local_va_agent_end_stage=LocalVAAgentPipelineState.END,
             cloud_va_agent_start_stage=CloudVAAgentPipelineState.INIT,
