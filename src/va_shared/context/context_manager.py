@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, field
 from typing import Any, AsyncIterable, Awaitable, Callable, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from homeassistant.util import ulid
 
@@ -52,8 +52,8 @@ class TTSContext(BaseModel):
 class LocalVAAgentContext(BaseModel):
     """Context specific to local voice assistant agent"""
 
-    local_processing_results: Dict[str, Any] = field(default_factory=dict)
-    metrics: PipelineMetrics = field(default_factory=PipelineMetrics)
+    local_processing_results: Dict[str, Any] = Field(default_factory=dict)
+    metrics: PipelineMetrics = Field(default_factory=PipelineMetrics)
     leaf_id: str | None = None
     summary: str | None = None
 
@@ -179,9 +179,9 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
     """Global context for HASS voice assistant pipeline"""
     hass_va_pipeline_start_stage: HASSPipelineStage = HASSPipelineStage.INIT
     hass_va_pipeline_end_stage: HASSPipelineStage = HASSPipelineStage.END
-    satellite_input_context: SatelliteInputContext = field(default_factory=SatelliteInputContext)
-    stt_context: STTContext = field(default_factory=STTContext)
-    va_agent_context: VoiceAssistantAgentContext = field(
+    satellite_input_context: SatelliteInputContext = Field(default_factory=SatelliteInputContext)
+    stt_context: STTContext = Field(default_factory=STTContext)
+    va_agent_context: VoiceAssistantAgentContext = Field(
         default_factory=lambda: VoiceAssistantAgentContext(
             conversation_id=ulid.ulid(),
             query_id=ulid.ulid(),
@@ -191,9 +191,9 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
             cloud_va_agent_end_stage=CloudVAAgentPipelineState.END,
         )
     )
-    tts_context: TTSContext = field(default_factory=TTSContext)
-    satellite_output_context: SatelliteOutputContext = field(default_factory=SatelliteOutputContext)
-    shared_data: Dict[str, Any] = field(default_factory=dict)
+    tts_context: TTSContext = Field(default_factory=TTSContext)
+    satellite_output_context: SatelliteOutputContext = Field(default_factory=SatelliteOutputContext)
+    shared_data: Dict[str, Any] = Field(default_factory=dict)
 
 
     def to_json(self) -> Dict[str, Any]:
