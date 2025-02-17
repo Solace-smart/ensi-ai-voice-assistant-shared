@@ -150,8 +150,7 @@ class PipelineMetrics(BaseModel):
         summary = [
             "\n=== Pipeline Execution Summary ===",
             f"Query: {self.query}",
-            f"Started at: {datetime.fromtimestamp(
-                self.start_time).strftime('%Y-%m-%d %H:%M:%S')}",
+            f"Started at: {datetime.fromtimestamp(self.start_time).strftime('%Y-%m-%d %H:%M:%S')}",
             f"Total duration: {self.total_duration:.2f}s",
             f"Final Path ID: {self.leaf_id}",
             f"Status: {'FAILED' if self.failed else 'SUCCESS'}",
