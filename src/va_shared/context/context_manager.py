@@ -182,8 +182,8 @@ class HASSVoiceAssistantPipelineContext(BaseModel):
     stt_context: STTContext = Field(default_factory=STTContext)
     va_agent_context: VoiceAssistantAgentContext = Field(
         default_factory=lambda: VoiceAssistantAgentContext(
-            conversation_id=ulid.new(),
-            query_id=ulid.new(),
+            conversation_id=str(ulid.new()),
+            query_id=str(ulid.new()),
             local_va_agent_start_stage=LocalVAAgentPipelineState.INIT,
             local_va_agent_end_stage=LocalVAAgentPipelineState.END,
             cloud_va_agent_start_stage=CloudVAAgentPipelineState.INIT,
