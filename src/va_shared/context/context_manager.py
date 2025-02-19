@@ -99,7 +99,7 @@ class VoiceAssistantAgentContext(BaseModel):
     language: str | None = None
     query_id: str | None = None
     query: str | None = None
-
+    original_query: str | None = None
     in_session_memory: list[dict[str, Any]] = []
     last_interaction: dict[str, Any] | None = None
     persistent_memory: dict[str, Any] = {}
@@ -118,6 +118,7 @@ class VoiceAssistantAgentContext(BaseModel):
             "conversation_id": self.conversation_id,
             "language": self.language,
             "query_id": self.query_id,
+            "original_query": self.original_query,
             "query": self.query,
             "in_session_memory": self.in_session_memory,
             "last_interaction": self.last_interaction,
@@ -139,6 +140,7 @@ class VoiceAssistantAgentContext(BaseModel):
             conversation_id=data["conversation_id"],
             language=data["language"],
             query_id=data["query_id"],
+            original_query=data["original_query"],
             query=data["query"],
             in_session_memory=data["in_session_memory"],
             last_interaction=data["last_interaction"],
