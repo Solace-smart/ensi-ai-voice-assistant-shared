@@ -140,7 +140,7 @@ class VoiceAssistantAgentContext(BaseModel):
             conversation_id=data["conversation_id"],
             language=data["language"],
             query_id=data["query_id"],
-            original_query=data["original_query"],
+            original_query=data.get("original_query"),
             query=data["query"],
             in_session_memory=data["in_session_memory"],
             last_interaction=data["last_interaction"],

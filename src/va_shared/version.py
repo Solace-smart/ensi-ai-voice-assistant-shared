@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 from typing import Tuple
 
-VERSION = "0.1.24"
+VERSION = "0.1.25"
 
 def get_version() -> str:
     """Get the current version."""
