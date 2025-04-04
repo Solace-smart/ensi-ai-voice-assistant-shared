@@ -76,6 +76,7 @@ class CloudVAAgentContext(BaseModel):
     response: str = ""
     ha_states: Dict[str, Any] = None
     ha_services: Dict[str, Any] = None
+    token_usage: Dict[str, Any] = None
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
