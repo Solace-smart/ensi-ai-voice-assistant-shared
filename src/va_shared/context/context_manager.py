@@ -74,9 +74,17 @@ class CloudVAAgentContext(BaseModel):
     leaf_id: str | None = ""
     summary: str | None = None
     response: str = ""
-    ha_states: Dict[str, Any] = Field(default_factory=dict)
-    ha_services: Dict[str, Any] = Field(default_factory=dict)
-    token_usage: Dict[str, Any] = Field(default_factory=dict)
+    ha_states: Dict[str, Any] = None
+    ha_services: Dict[str, Any] = None
+    token_usage: Dict[str, Dict[str, int]] = Field(
+        default_factory=lambda: {
+            "all_classification": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "entity_selection": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "service_argument": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "final_response": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "general_conversation": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        }
+    )
 
     def to_json(self) -> Dict[str, Any]:
         """Convert to JSON serializable dict."""
@@ -100,7 +108,7 @@ class VoiceAssistantAgentContext(BaseModel):
     language: str | None = None
     query_id: str | None = None
     query: str | None = None
-    original_query: str | None = None
+    translated_query: str | None = None
     in_session_memory: list[dict[str, Any]] = []
     last_interaction: dict[str, Any] | None = None
     persistent_memory: dict[str, Any] = {}
@@ -119,7 +127,7 @@ class VoiceAssistantAgentContext(BaseModel):
             "conversation_id": self.conversation_id,
             "language": self.language,
             "query_id": self.query_id,
-            "original_query": self.original_query,
+            "translated_query": self.translated_query,
             "query": self.query,
             "in_session_memory": self.in_session_memory,
             "last_interaction": self.last_interaction,
@@ -141,7 +149,7 @@ class VoiceAssistantAgentContext(BaseModel):
             conversation_id=data["conversation_id"],
             language=data["language"],
             query_id=data["query_id"],
-            original_query=data.get("original_query"),
+            translated_query=data.get("translated_query"),
             query=data["query"],
             in_session_memory=data["in_session_memory"],
             last_interaction=data["last_interaction"],
